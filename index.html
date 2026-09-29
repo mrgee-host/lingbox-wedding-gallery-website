@@ -9,7 +9,7 @@
   --gold:#f4cf69; --text:#fff; --muted:rgba(255,255,255,.66);
   --card-w: min(300px, 25vw);
   --card-h: calc(var(--card-w) * 1.5);
-  --stage-offset: 80px;
+  --stage-offset: 60px;
 }
 
 *{box-sizing:border-box}
@@ -29,8 +29,10 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 
 .card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
 
-.card-scaler{width:100%;height:100%;border-radius:12px;overflow:hidden;position:relative;background:#171412;box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);transition:box-shadow 0.9s ease; -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0);}
+/* SUDUT LENGKUNG DIKURANGI: border-radius menjadi 4px saja agar tegas seperti cetak foto asli */
+.card-scaler{width:100%;height:100%;border-radius:4px;overflow:hidden;position:relative;background:#171412;box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);transition:box-shadow 0.9s ease; -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0);}
 .card-scaler img{width:100%;height:100%;display:block;object-fit:cover;position:relative;z-index:1;}
+
 .card.center .card-scaler{box-shadow:0 0 60px rgba(244, 207, 105, 0.35), 0 45px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,.3);}
 
 .card-scaler::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 45%);z-index:2;opacity:0;transition:opacity 0.9s;pointer-events:none}
@@ -53,23 +55,27 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .dots{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
 
-/* PENGATURAN KHUSUS MOBILE / SMARTPHONE */
+/* STYLING UNTUK ZOOM / LIGHTBOX */
+#lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+#lightbox.show { opacity: 1; pointer-events: auto; }
+#lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#lightbox.show img { transform: scale(1); }
+.lb-close { position: absolute; top: 25px; right: 25px; width: 45px; height: 45px; background: rgba(255,255,255,0.15); color: #fff; border-radius: 50%; display: grid; place-items: center; font-size: 22px; cursor: pointer; transition: background 0.3s; font-family: sans-serif; }
+.lb-close:hover { background: rgba(255,255,255,0.35); }
+
 @media(max-width:800px){
- :root { --card-w: min(240px, 65vw); } /* Kartu dibesarkan sedikit di layar kecil */
- header { padding-top: 20px; } /* Header dipadatkan */
+ :root { --card-w: min(240px, 65vw); } 
+ header { padding-top: 20px; } 
  .header-titles h1{font-size:22px; margin-bottom:4px;}
  .counter-badge { margin-top: 10px; }
- 
- /* INI KUNCI OPTIMASI HP: Menarik Stage ke atas sejauh 80px agar tepat di tengah secara visual */
  .stage{height:100vh; margin-top: calc(var(--stage-offset) - 80px);}
- 
  .card.left{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.65)) translateZ(-60px) rotateY(20deg) scale(0.85)}
  .card.right{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.65)) translateZ(-60px) rotateY(-20deg) scale(0.85)}
  .card.farleft,.card.farright{display:none}
  .nav.prev{left:10px; width:35px; height:35px; font-size:18px;}
  .nav.next{right:10px; width:35px; height:35px; font-size:18px;}
  .bottom{bottom:25px;padding:0 20px;justify-content:center;}.hint{display:none}
- .dots{bottom: 25px;} /* Titik indikator dinaikkan sedikit di HP */
+ .dots{bottom: 25px;} 
 }
 </style>
 </head>
@@ -91,9 +97,15 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 </main>
 
 <div class="bottom">
-  <div class="hint">Geser / klik foto untuk melihat lainnya<br>Anda juga bisa menggunakan panah ◀ ▶ pada keyboard</div>
+  <div class="hint">Klik foto tengah untuk ZOOM • Geser foto untuk melihat lainnya</div>
 </div>
 <div class="dots" id="dots"></div>
+
+<!-- ELEMEN LAYAR ZOOM (LIGHTBOX) -->
+<div id="lightbox">
+  <div class="lb-close">✕</div>
+  <img id="lb-img" src="" alt="Zoom Photo">
+</div>
 
 <script>
 const state = {
@@ -103,6 +115,7 @@ const state = {
 };
 const stage=document.getElementById("stage"), dots=document.getElementById("dots");
 const ambient=document.getElementById("ambient"), count=document.getElementById("count"), total=document.getElementById("total");
+const lightbox=document.getElementById("lightbox"), lbImg=document.getElementById("lb-img");
 
 function init() {
   total.textContent = state.files.length;
@@ -118,7 +131,21 @@ function init() {
     
     scaler.appendChild(img);
     card.appendChild(scaler);
-    card.onclick = () => { state.index = i; render(); restart(); };
+    
+    // FUNGSI KLIK CARD
+    card.onclick = () => { 
+      if(state.index === i) {
+        // Jika foto sedang fokus (tengah), buka Zoom Lightbox
+        lbImg.src = src;
+        lightbox.classList.add("show");
+        clearInterval(state.timer); // Hentikan slideshow otomatis
+      } else {
+        // Jika foto ada di pinggir, geser ke tengah
+        state.index = i; 
+        render(); 
+        restart(); 
+      }
+    };
     
     stage.appendChild(card);
     state.cards.push(card);
@@ -129,8 +156,6 @@ function init() {
     dots.appendChild(d);
   });
   render();
-  
-  // Memulai otomatis tanpa layar start pembuka
   restart();
 }
 
@@ -157,10 +182,20 @@ function next(){if(state.files.length<=1)return;state.index=(state.index+1)%stat
 function prev(){if(state.files.length<=1)return;state.index=(state.index-1+state.files.length)%state.files.length;render();restart()}
 function restart(){clearInterval(state.timer);state.timer=setInterval(next,5000)}
 
-document.querySelector(".next").onclick=next; document.querySelector(".prev").onclick=prev;
-document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();if(e.key===" ")next();});
+// Tombol Tutup Lightbox
+lightbox.onclick = () => {
+  lightbox.classList.remove("show");
+  restart(); // Lanjutkan slideshow otomatis
+};
 
-// EFEK TOUCH SWIPE (GESER DENGAN JARI DI LAYAR HP)
+document.querySelector(".next").onclick=next; document.querySelector(".prev").onclick=prev;
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight")next();
+  if(e.key==="ArrowLeft")prev();
+  if(e.key==="Escape") lightbox.classList.remove("show");
+});
+
+// Fitur Touch Swipe untuk HP
 let touchstartX = 0;
 let touchendX = 0;
 document.addEventListener('touchstart', e => {
@@ -169,8 +204,8 @@ document.addEventListener('touchstart', e => {
 
 document.addEventListener('touchend', e => {
   touchendX = e.changedTouches[0].screenX;
-  if (touchendX < touchstartX - 50) next(); // Geser kiri -> Next
-  if (touchendX > touchstartX + 50) prev(); // Geser kanan -> Prev
+  if (touchendX < touchstartX - 50) next(); 
+  if (touchendX > touchstartX + 50) prev(); 
 }, {passive: true});
 
 init();
