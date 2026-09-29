@@ -27,7 +27,6 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 
 .card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
 
-/* FIX ANDROID GPU TEARING */
 .card-scaler{
   width:100%; height:100%; border-radius:4px; overflow:hidden; position:relative; 
   background:#ffffff; 
@@ -53,6 +52,20 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .card-scaler::after{content:"";position:absolute;top:0;left:-150%;width:150%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);transform:skewX(-25deg);z-index:3;pointer-events:none}
 .card.center .card-scaler::after{animation:shine 2s cubic-bezier(0.25, 1, 0.3, 1) 0.5s forwards}
 @keyframes shine{0%{left:-150%;opacity:0}20%{opacity:1}100%{left:150%;opacity:0}}
+
+/* STYLING LENCANA LOKASI (SETENGAH KELUAR) */
+/* Posisi ditaruh di -14px agar menggantung tepat di batas bawah foto */
+.loc-badge {
+  position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(8px);
+  padding: 6px 14px; border-radius: 20px; color: #fff; font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid rgba(255,255,255,0.15); z-index: 10;
+  opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5); white-space: nowrap;
+}
+.card.center .loc-badge { opacity: 1; }
+.loc-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; display: inline-block; }
 
 .zoom-btn{position:absolute;bottom:10px;right:10px;width:38px;height:38px;background:rgba(0,0,0,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;z-index:10;opacity:0;pointer-events:none;transition:0.3s ease;backdrop-filter:blur(3px);border:1px solid rgba(255,255,255,0.2);}
 .card.center .zoom-btn{opacity:1;pointer-events:auto;}
@@ -134,7 +147,7 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 <script>
 
 const state = {
-  files: ["https://i.imgur.com/7SCgG33.jpeg","https://i.imgur.com/7KnQz7C.jpeg","https://i.imgur.com/B4rsmji.jpeg","https://i.imgur.com/67lWsZs.jpeg"],
+  files: [{"src":"https://i.imgur.com/7SCgG33.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/7KnQz7C.jpeg","label":"Padangsidempuan"},{"src":"https://i.imgur.com/B4rsmji.jpeg","label":"Sibolga"},{"src":"https://i.imgur.com/67lWsZs.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/LJZ1c6i.jpeg","label":"Medan"}],
   index: 0, timer: null,
   cards: []
 };
@@ -143,7 +156,7 @@ const ambient=document.getElementById("ambient");
 const lightbox=document.getElementById("lightbox"), lbImg=document.getElementById("lb-img");
 
 function init() {
-  state.files.forEach((src, i) => {
+  state.files.forEach((item, i) => {
     const card = document.createElement("div");
     card.className = "card hidden";
     
@@ -151,7 +164,7 @@ function init() {
     scaler.className = "card-scaler";
     
     const img = document.createElement("img");
-    img.src = src;
+    img.src = item.src;
     
     const zoomBtn = document.createElement("div");
     zoomBtn.className = "zoom-btn";
@@ -160,7 +173,7 @@ function init() {
     zoomBtn.onclick = (e) => {
       e.stopPropagation(); 
       if(state.index === i) {
-        lbImg.src = src;
+        lbImg.src = item.src;
         lightbox.classList.add("show");
         clearInterval(state.timer); 
       }
@@ -169,6 +182,14 @@ function init() {
     scaler.appendChild(img);
     scaler.appendChild(zoomBtn);
     card.appendChild(scaler);
+
+    // MEMBUAT LENCANA LOKASI DI LUAR SCALER AGAR MENGGANTUNG
+    if(item.label) {
+      const badge = document.createElement("div");
+      badge.className = "loc-badge";
+      badge.innerHTML = '<span class="loc-dot"></span>' + item.label;
+      card.appendChild(badge);
+    }
     
     card.onclick = () => { 
       if(state.index !== i) {
