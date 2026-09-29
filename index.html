@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wedding Photobooth — Gallery</title>
+<style>
+/* KONTROL UKURAN & POSISI DISUNTIKKAN KE SINI */
+:root{
+  --gold:#f4cf69; --text:#fff; --muted:rgba(255,255,255,.66);
+  --card-w: min(300px, 25vw);
+  --card-h: calc(var(--card-w) * 1.5);
+  --stage-offset: -160px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;color:var(--text);font-family:Inter,sans-serif}
+body:before{content:"";position:fixed;inset:-8%;z-index:-3;background:radial-gradient(circle at 50% 35%,#6c4c24 0,#251b12 28%,#0b0a09 68%);}
+#ambient{position:fixed;inset:-10%;z-index:-2;background-position:center;background-size:cover;filter:blur(55px) saturate(1.25);transform:scale(1.12);opacity:.72;transition:background-image 0.9s ease,opacity 0.9s ease}
+#shade{position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 50%,transparent 0,rgba(0,0,0,.10) 35%,rgba(0,0,0,.68) 88%),linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.52));pointer-events:none}
+
+header{position:absolute;top:0;left:0;width:100%;padding-top:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:5;text-align:center;pointer-events:none;}
+.header-titles h1{font-family:Georgia,serif;margin:0 0 6px;font-size:28px;color:var(--gold);font-weight:700;}
+.header-titles p{margin:0;color:#eee;font-size:13px;letter-spacing:0.5px;}
+.counter-badge{display:inline-block;background:rgba(25,25,25,.52);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);border-radius:20px;padding:6px 14px;font-size:10px;color:#ddd;margin-top:14px;letter-spacing:1px;}
+.counter-badge strong{font-size:11px;}
+
+main{height:100vh;position:relative;display:flex;align-items:center;justify-content:center}
+
+/* POSISI VERTIKAL DIAPLIKASIKAN DI SINI (margin-top) */
+.stage{position:relative;width:min(1200px,100vw);height:min(700px,calc(100vh - 50px));display:flex;align-items:center;justify-content:center;perspective:1200px;transform-style:preserve-3d; margin-top: var(--stage-offset);}
+
+.card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
+
+.card-scaler{width:100%;height:100%;border-radius:12px;overflow:hidden;position:relative;background:#171412;box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);transition:box-shadow 0.9s ease; -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0);}
+.card-scaler img{width:100%;height:100%;display:block;object-fit:cover;position:relative;z-index:1;}
+
+.card.center .card-scaler{box-shadow:0 45px 100px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.25);}
+
+.card-scaler::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 45%);z-index:2;opacity:0;transition:opacity 0.9s;pointer-events:none}
+.card.center .card-scaler::before{opacity:1}
+.card-scaler::after{content:"";position:absolute;top:0;left:-150%;width:150%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);transform:skewX(-25deg);z-index:3;pointer-events:none}
+.card.center .card-scaler::after{animation:shine 2s cubic-bezier(0.25, 1, 0.3, 1) 0.5s forwards}
+@keyframes shine{0%{left:-150%;opacity:0}20%{opacity:1}100%{left:150%;opacity:0}}
+
+.card.center{z-index:5; transform:translate(-50%,-50%) translateZ(120px) scale(1.05); filter:none; opacity:1;}
+.card.left{z-index:3;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.85)) translateZ(-60px) rotateY(20deg) scale(0.85);filter:saturate(.8) brightness(.7);opacity:.95}
+.card.right{z-index:3;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.85)) translateZ(-60px) rotateY(-20deg) scale(0.85);filter:saturate(.8) brightness(.7);opacity:.95}
+.card.farleft{z-index:1;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -1.5)) translateZ(-150px) rotateY(35deg) scale(0.7);filter:brightness(.4);opacity:.6}
+.card.farright{z-index:1;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 1.5)) translateZ(-150px) rotateY(-35deg) scale(0.7);filter:brightness(.4);opacity:.6}
+.card.hidden{opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.45)}
+
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(20,20,20,.30);color:white;font-size:22px;display:grid;place-items:center;cursor:pointer;z-index:8;backdrop-filter:blur(10px);transition:background 0.3s}
+.nav:hover{background:rgba(255,255,255,.2)}.nav.prev{left:24px}.nav.next{right:24px}
+.bottom{position:fixed;left:0;right:0;bottom:28px;padding:0 36px;display:flex;justify-content:flex-end;align-items:end;z-index:6}
+.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:right;line-height:1.4}
+.dots{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:6px;z-index:7}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
+
+#start{position:fixed;inset:0;z-index:30;background:rgba(7,6,5,.96);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;transition:opacity 0.6s}
+#start h2{font-family:Georgia,serif;margin:0;font-size:28px;text-align:center;padding:0 20px;}
+.startbtn{border:0;background:#f4cf69;color:#201705;padding:12px 22px;border-radius:999px;font-weight:800;cursor:pointer;transition:transform 0.2s}
+.startbtn:hover{transform:scale(1.05)}
+
+@media(max-width:800px){
+ :root { --card-w: min(220px, 55vw); }
+ .stage{height:100vh;}
+ .card.left{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.65)) translateZ(-60px) rotateY(20deg) scale(0.85)}
+ .card.right{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.65)) translateZ(-60px) rotateY(-20deg) scale(0.85)}
+ .card.farleft,.card.farright{display:none}
+ .nav.prev{left:9px}.nav.next{right:9px}
+ .bottom{bottom:25px;padding:0 20px;justify-content:center;}.hint{display:none}
+ .header-titles h1{font-size:22px;}
+}
+</style>
+</head>
+<body>
+<div id="ambient"></div><div id="shade"></div>
+
+<div id="start">
+  <h2>Lingbox Wedding Gallery</h2>
+  <button class="startbtn" id="startBtn">Lihat Foto ✨</button>
+</div>
+
+<header>
+  <div class="header-titles">
+    <h1>Lingbox Wedding Gallery</h1>
+    <p>Ayo booking untuk acara nikahan kamu!</p>
+    <div class="counter-badge"><strong id="count">1</strong> / <span id="total">5</span></div>
+  </div>
+</header>
+
+<main>
+  <button class="nav prev" aria-label="Previous">‹</button>
+  <div class="stage" id="stage"></div>
+  <button class="nav next" aria-label="Next">›</button>
+</main>
+
+<div class="bottom">
+  <div class="hint">Geser / klik foto untuk melihat lainnya<br>Anda juga bisa menggunakan panah ◀ ▶ pada keyboard</div>
+</div>
+<div class="dots" id="dots"></div>
+
+<script>
+const state = {
+  files: ["https://i.imgur.com/7SCgG33.jpeg","https://i.imgur.com/7KnQz7C.jpeg","https://i.imgur.com/B4rsmji.jpeg","https://i.imgur.com/67lWsZs.jpeg","https://i.imgur.com/7KnQz7C.jpeg"],
+  index: 0, timer: null,
+  cards: []
+};
+const stage=document.getElementById("stage"), dots=document.getElementById("dots");
+const ambient=document.getElementById("ambient"), count=document.getElementById("count"), total=document.getElementById("total");
+
+function init() {
+  total.textContent = state.files.length;
+  state.files.forEach((src, i) => {
+    const card = document.createElement("div");
+    card.className = "card hidden";
+    
+    const scaler = document.createElement("div");
+    scaler.className = "card-scaler";
+    
+    const img = document.createElement("img");
+    img.src = src;
+    
+    scaler.appendChild(img);
+    card.appendChild(scaler);
+    card.onclick = () => { state.index = i; render(); restart(); };
+    
+    stage.appendChild(card);
+    state.cards.push(card);
+
+    const d = document.createElement("span");
+    d.className = "dot";
+    d.onclick = () => { state.index = i; render(); restart(); };
+    dots.appendChild(d);
+  });
+  render();
+}
+
+function render(){
+  const n = state.files.length;
+  state.cards.forEach((card, i) => {
+    const d = (i - state.index + n) % n;
+    card.className = "card " + (d === 0 ? "center" : d === 1 ? "right" : d === n - 1 ? "left" : d === 2 ? "farright" : d === n - 2 ? "farleft" : "hidden");
+  });
+
+  Array.from(dots.children).forEach((dot, i) => {
+    dot.className = "dot" + (i === state.index ? " active" : "");
+  });
+
+  const activeCard = state.cards[state.index];
+  if(activeCard) ambient.style.backgroundImage = `url("${activeCard.querySelector("img").src}")`;
+  count.textContent = state.index + 1;
+}
+
+function next(){if(state.files.length<=1)return;state.index=(state.index+1)%state.files.length;render();restart()}
+function prev(){if(state.files.length<=1)return;state.index=(state.index-1+state.files.length)%state.files.length;render();restart()}
+function restart(){clearInterval(state.timer);state.timer=setInterval(next,5000)}
+
+document.querySelector(".next").onclick=next; document.querySelector(".prev").onclick=prev;
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();if(e.key===" ")next();});
+document.getElementById("startBtn").onclick=()=>{
+  document.getElementById("start").style.opacity="0";
+  setTimeout(()=>{document.getElementById("start").style.display="none";restart()}, 600);
+};
+
+init();
+</script>
+</body>
+</html>
