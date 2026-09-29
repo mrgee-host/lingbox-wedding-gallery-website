@@ -21,15 +21,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;col
 header{position:absolute;top:0;left:0;width:100%;padding-top:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;text-align:center;pointer-events:none;}
 .header-titles h1{font-family:Georgia,serif;margin:0 0 6px;font-size:28px;color:var(--gold);font-weight:700;}
 .header-titles p{margin:0;color:#eee;font-size:13px;letter-spacing:0.5px;}
-.counter-badge{display:inline-block;background:rgba(25,25,25,.52);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);border-radius:20px;padding:6px 14px;font-size:10px;color:#ddd;margin-top:14px;letter-spacing:1px;}
-.counter-badge strong{font-size:11px;}
 
 main{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;z-index:10;}
 .stage{position:relative;width:min(1200px,100vw);height:min(700px,calc(100vh - 50px));display:flex;align-items:center;justify-content:center;perspective:1200px;transform-style:preserve-3d; margin-top: var(--stage-offset);}
 
 .card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
 
-/* SUDUT LENGKUNG DIKURANGI: border-radius menjadi 4px saja agar tegas seperti cetak foto asli */
 .card-scaler{width:100%;height:100%;border-radius:4px;overflow:hidden;position:relative;background:#171412;box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);transition:box-shadow 0.9s ease; -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0);}
 .card-scaler img{width:100%;height:100%;display:block;object-fit:cover;position:relative;z-index:1;}
 
@@ -50,10 +47,16 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 
 .nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(20,20,20,.30);color:white;font-size:22px;display:grid;place-items:center;cursor:pointer;z-index:25;backdrop-filter:blur(10px);transition:background 0.3s}
 .nav:hover{background:rgba(255,255,255,.2)}.nav.prev{left:24px}.nav.next{right:24px}
-.bottom{position:fixed;left:0;right:0;bottom:28px;padding:0 36px;display:flex;justify-content:flex-end;align-items:end;z-index:20}
-.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:right;line-height:1.4}
-.dots{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
+
+.bottom{position:fixed;left:0;right:0;bottom:35px;padding:0 36px;display:flex;justify-content:flex-end;align-items:end;z-index:20;pointer-events:none;}
+.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:right;line-height:1.4; pointer-events:auto;}
+.dots{position:fixed;left:50%;bottom:95px;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
+
+/* STYLING TOMBOL WHATSAPP (CALL TO ACTION) */
+.wa-btn { position:fixed; bottom:25px; left:50%; transform:translateX(-50%); background:#25d366; color:#fff; font-family:Inter, sans-serif; font-weight:700; font-size:14px; text-decoration:none; padding:12px 24px; border-radius:50px; display:flex; align-items:center; gap:8px; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:50; transition:transform 0.2s, background 0.2s; border:1px solid rgba(255,255,255,0.2); }
+.wa-btn:hover { background:#20bd5a; transform:translateX(-50%) scale(1.05); }
+.wa-btn svg { width:20px; height:20px; fill:#fff; }
 
 /* STYLING UNTUK ZOOM / LIGHTBOX */
 #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
@@ -67,7 +70,6 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
  :root { --card-w: min(240px, 65vw); } 
  header { padding-top: 20px; } 
  .header-titles h1{font-size:22px; margin-bottom:4px;}
- .counter-badge { margin-top: 10px; }
  .stage{height:100vh; margin-top: calc(var(--stage-offset) - 80px);}
  .card.left{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.65)) translateZ(-60px) rotateY(20deg) scale(0.85)}
  .card.right{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.65)) translateZ(-60px) rotateY(-20deg) scale(0.85)}
@@ -75,7 +77,7 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
  .nav.prev{left:10px; width:35px; height:35px; font-size:18px;}
  .nav.next{right:10px; width:35px; height:35px; font-size:18px;}
  .bottom{bottom:25px;padding:0 20px;justify-content:center;}.hint{display:none}
- .dots{bottom: 25px;} 
+ .dots{bottom: 95px;} 
 }
 </style>
 </head>
@@ -86,7 +88,6 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
   <div class="header-titles">
     <h1>Lingbox Wedding Gallery</h1>
     <p>Ayo booking untuk acara nikahan kamu!</p>
-    <div class="counter-badge"><strong id="count">1</strong> / <span id="total">5</span></div>
   </div>
 </header>
 
@@ -101,6 +102,12 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 </div>
 <div class="dots" id="dots"></div>
 
+<!-- TOMBOL WHATSAPP FLOATING DI TENGAH BAWAH -->
+<a href="https://wa.me/6285270022255?text=Halo,%20saya%20ingin%20booking%20Lingbox%20Photobooth!" class="wa-btn" target="_blank">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  Booking Sekarang!
+</a>
+
 <!-- ELEMEN LAYAR ZOOM (LIGHTBOX) -->
 <div id="lightbox">
   <div class="lb-close">✕</div>
@@ -114,11 +121,10 @@ const state = {
   cards: []
 };
 const stage=document.getElementById("stage"), dots=document.getElementById("dots");
-const ambient=document.getElementById("ambient"), count=document.getElementById("count"), total=document.getElementById("total");
+const ambient=document.getElementById("ambient");
 const lightbox=document.getElementById("lightbox"), lbImg=document.getElementById("lb-img");
 
 function init() {
-  total.textContent = state.files.length;
   state.files.forEach((src, i) => {
     const card = document.createElement("div");
     card.className = "card hidden";
@@ -132,15 +138,12 @@ function init() {
     scaler.appendChild(img);
     card.appendChild(scaler);
     
-    // FUNGSI KLIK CARD
     card.onclick = () => { 
       if(state.index === i) {
-        // Jika foto sedang fokus (tengah), buka Zoom Lightbox
         lbImg.src = src;
         lightbox.classList.add("show");
-        clearInterval(state.timer); // Hentikan slideshow otomatis
+        clearInterval(state.timer); 
       } else {
-        // Jika foto ada di pinggir, geser ke tengah
         state.index = i; 
         render(); 
         restart(); 
@@ -175,17 +178,15 @@ function render(){
     const imgSrc = activeCard.querySelector("img").src;
     ambient.style.backgroundImage = "url('" + imgSrc + "')";
   }
-  count.textContent = state.index + 1;
 }
 
 function next(){if(state.files.length<=1)return;state.index=(state.index+1)%state.files.length;render();restart()}
 function prev(){if(state.files.length<=1)return;state.index=(state.index-1+state.files.length)%state.files.length;render();restart()}
 function restart(){clearInterval(state.timer);state.timer=setInterval(next,5000)}
 
-// Tombol Tutup Lightbox
 lightbox.onclick = () => {
   lightbox.classList.remove("show");
-  restart(); // Lanjutkan slideshow otomatis
+  restart(); 
 };
 
 document.querySelector(".next").onclick=next; document.querySelector(".prev").onclick=prev;
@@ -195,7 +196,6 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape") lightbox.classList.remove("show");
 });
 
-// Fitur Touch Swipe untuk HP
 let touchstartX = 0;
 let touchendX = 0;
 document.addEventListener('touchstart', e => {
