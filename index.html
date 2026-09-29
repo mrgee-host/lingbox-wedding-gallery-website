@@ -9,16 +9,13 @@
   --gold:#f4cf69; --text:#fff; --muted:rgba(255,255,255,.66);
   --card-w: min(300px, 25vw);
   --card-h: calc(var(--card-w) * 1.5);
-  --stage-offset: 100px;
+  --stage-offset: 0px;
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;color:var(--text);font-family:Inter,sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;color:var(--text);font-family:Inter,sans-serif; touch-action: pan-y;}
 
-/* Z-INDEX FIX: z-index positif agar tidak tertutup background hitam */
 #ambient{position:fixed;inset:-10%;z-index:1;background-color:#090807;background-position:center;background-size:cover;filter:blur(45px) saturate(1.4) brightness(0.65);transform:scale(1.1);opacity:1;transition:background-image 0.9s ease;}
-
-/* SHADE: Hanya gradasi hitam mulus untuk efek vignette (tanpa dot) */
 #shade{position:fixed;inset:0;z-index:2;background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);pointer-events:none}
 
 header{position:absolute;top:0;left:0;width:100%;padding-top:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;text-align:center;pointer-events:none;}
@@ -34,8 +31,6 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 
 .card-scaler{width:100%;height:100%;border-radius:12px;overflow:hidden;position:relative;background:#171412;box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);transition:box-shadow 0.9s ease; -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0);}
 .card-scaler img{width:100%;height:100%;display:block;object-fit:cover;position:relative;z-index:1;}
-
-/* Efek cahaya glowing keemasan pada foto tengah */
 .card.center .card-scaler{box-shadow:0 0 60px rgba(244, 207, 105, 0.35), 0 45px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,.3);}
 
 .card-scaler::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 45%);z-index:2;opacity:0;transition:opacity 0.9s;pointer-events:none}
@@ -58,15 +53,23 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .dots{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
 
+/* PENGATURAN KHUSUS MOBILE / SMARTPHONE */
 @media(max-width:800px){
- :root { --card-w: min(220px, 55vw); }
- .stage{height:100vh;}
+ :root { --card-w: min(240px, 65vw); } /* Kartu dibesarkan sedikit di layar kecil */
+ header { padding-top: 20px; } /* Header dipadatkan */
+ .header-titles h1{font-size:22px; margin-bottom:4px;}
+ .counter-badge { margin-top: 10px; }
+ 
+ /* INI KUNCI OPTIMASI HP: Menarik Stage ke atas sejauh 80px agar tepat di tengah secara visual */
+ .stage{height:100vh; margin-top: calc(var(--stage-offset) - 80px);}
+ 
  .card.left{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.65)) translateZ(-60px) rotateY(20deg) scale(0.85)}
  .card.right{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.65)) translateZ(-60px) rotateY(-20deg) scale(0.85)}
  .card.farleft,.card.farright{display:none}
- .nav.prev{left:9px}.nav.next{right:9px}
+ .nav.prev{left:10px; width:35px; height:35px; font-size:18px;}
+ .nav.next{right:10px; width:35px; height:35px; font-size:18px;}
  .bottom{bottom:25px;padding:0 20px;justify-content:center;}.hint{display:none}
- .header-titles h1{font-size:22px;}
+ .dots{bottom: 25px;} /* Titik indikator dinaikkan sedikit di HP */
 }
 </style>
 </head>
@@ -156,6 +159,19 @@ function restart(){clearInterval(state.timer);state.timer=setInterval(next,5000)
 
 document.querySelector(".next").onclick=next; document.querySelector(".prev").onclick=prev;
 document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();if(e.key===" ")next();});
+
+// EFEK TOUCH SWIPE (GESER DENGAN JARI DI LAYAR HP)
+let touchstartX = 0;
+let touchendX = 0;
+document.addEventListener('touchstart', e => {
+  touchstartX = e.changedTouches[0].screenX;
+}, {passive: true});
+
+document.addEventListener('touchend', e => {
+  touchendX = e.changedTouches[0].screenX;
+  if (touchendX < touchstartX - 50) next(); // Geser kiri -> Next
+  if (touchendX > touchstartX + 50) prev(); // Geser kanan -> Prev
+}, {passive: true});
 
 init();
 </script>
