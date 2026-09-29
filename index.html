@@ -7,7 +7,7 @@
 <style>
 :root{
   --gold:#f4cf69; --text:#fff; --muted:rgba(255,255,255,.66);
-  --card-w: min(350px, 25vw);
+  --card-w: min(300px, 25vw);
   --card-h: calc(var(--card-w) * 1.5);
   --stage-offset: 60px;
 }
@@ -27,10 +27,24 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 
 .card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
 
-.card-scaler{width:100%;height:100%;border-radius:4px;overflow:hidden;position:relative;background:transparent;box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);transition:box-shadow 0.9s ease; -webkit-backface-visibility: hidden; backface-visibility: hidden;}
+/* FIX ANDROID GPU TEARING */
+.card-scaler{
+  width:100%; height:100%; border-radius:4px; overflow:hidden; position:relative; 
+  background:#ffffff; 
+  box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);
+  transition:box-shadow 0.9s ease; 
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
 
-/* FIX GARIS HITAM (GPU Tiling Artifacts): Menambahkan scale mikro (1.01) agar gambar membesar 1% dan menutupi celah piksel bocor saat di-render secara 3D */
-.card-scaler img{width:100%;height:100%;display:block;object-fit:cover;position:relative;z-index:1; transform: scale(1.01);}
+.card-scaler img{
+  width:100%; height:100%; display:block; object-fit:cover; position:relative; z-index:1;
+  background-color: #ffffff;
+  transform: translate3d(0,0,0) scale(1.01);
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  outline: 1px solid transparent;
+  will-change: transform;
+}
 
 .card.center .card-scaler{box-shadow:0 0 60px rgba(244, 207, 105, 0.35), 0 45px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,.3);}
 
@@ -60,12 +74,10 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .dots{position:fixed;left:50%;bottom:95px;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
 
-/* STYLING TOMBOL WHATSAPP */
 .wa-btn { position:fixed; bottom:25px; left:50%; transform:translateX(-50%); background:#25d366; color:#fff; font-family:Inter, sans-serif; font-weight:700; font-size:14px; text-decoration:none; padding:12px 24px; border-radius:50px; display:flex; align-items:center; gap:8px; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:50; transition:transform 0.2s, background 0.2s; border:1px solid rgba(255,255,255,0.2); pointer-events:auto; }
 .wa-btn:hover { background:#20bd5a; transform:translateX(-50%) scale(1.05); }
 .wa-btn svg { width:20px; height:20px; fill:#fff; }
 
-/* STYLING LIGHTBOX */
 #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
 #lightbox.show { opacity: 1; pointer-events: auto; }
 #lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -109,10 +121,9 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 </div>
 <div class="dots" id="dots"></div>
 
-<!-- TOMBOL WHATSAPP DENGAN LINK YANG SUDAH DIENKRIPSI AMAN -->
-<a href="https://wa.me/6285270022255?text=Halo%20Lingbox%2C%20saya%20mau%20tanya%20paket%20photobooth-nya%20dong!" class="wa-btn" target="_blank">
+<a href="https://wa.me/6285270022255?text=Halo%20Lingbox%2C%20saya%20ingin%20tanya%20paket%20Photobooth!" class="wa-btn" target="_blank">
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-  Booking Sekarang
+  Booking Sekarang!
 </a>
 
 <div id="lightbox">
@@ -121,6 +132,7 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 </div>
 
 <script>
+
 const state = {
   files: ["https://i.imgur.com/7SCgG33.jpeg","https://i.imgur.com/7KnQz7C.jpeg","https://i.imgur.com/B4rsmji.jpeg","https://i.imgur.com/67lWsZs.jpeg"],
   index: 0, timer: null,
@@ -225,6 +237,7 @@ document.addEventListener('touchend', e => {
 }, {passive: true});
 
 init();
+
 </script>
 </body>
 </html>
