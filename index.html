@@ -3,13 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
 <title>Wedding Photobooth — Gallery</title>
 <style>
 :root{
   --gold:#f4cf69; --text:#fff; --muted:rgba(255,255,255,.66);
-  --card-w: min(300px, 25vw);
+  --input-w: 300px;
+  --max-h: calc(100vh - 280px);
+  --card-w: min(var(--input-w), 75vw, calc(var(--max-h) / 1.5));
   --card-h: calc(var(--card-w) * 1.5);
-  --stage-offset: 60px;
+  --stage-offset: 0px;
 }
 
 *{box-sizing:border-box}
@@ -18,31 +21,52 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;col
 #ambient{position:fixed;inset:-10%;z-index:1;background-color:#090807;background-position:center;background-size:cover;filter:blur(45px) saturate(1.4) brightness(0.65);transform:scale(1.1);opacity:1;transition:background-image 0.9s ease;}
 #shade{position:fixed;inset:0;z-index:2;background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);pointer-events:none}
 
-header{position:absolute;top:0;left:0;width:100%;padding-top:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;text-align:center;pointer-events:none;}
-.header-titles h1{font-family:Georgia,serif;margin:0 0 6px;font-size:28px;color:var(--gold);font-weight:700;}
-.header-titles p{margin:0;color:#eee;font-size:13px;letter-spacing:0.5px;}
+.layout-wrapper {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 3vh 0; box-sizing: border-box;
+  pointer-events: none; 
+}
 
-main{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;z-index:10;}
-.stage{position:relative;width:min(1200px,100vw);height:min(700px,calc(100vh - 50px));display:flex;align-items:center;justify-content:center;perspective:1200px;transform-style:preserve-3d; margin-top: var(--stage-offset);}
+header { 
+  flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; 
+  z-index: 20; text-align: center; pointer-events: none; padding: 0 20px; 
+}
+.header-titles h1 { font-family: Georgia,serif; margin: 0 0 6px; font-size: 28px; color: var(--gold); font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
+.header-titles p { margin: 0; color: #eee; font-size: 13px; letter-spacing: 0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
 
-.card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
+main { 
+  flex: 1 1 auto; display: flex; align-items: center; justify-content: center; 
+  position: relative; z-index: 10; pointer-events: none; min-height: 0; 
+}
+.stage { 
+  position: relative; width: 100%; height: var(--card-h); 
+  perspective: 1200px; transform-style: preserve-3d; display: flex; align-items: center; justify-content: center; 
+  transform: translateY(var(--stage-offset)); 
+}
+
+footer { 
+  flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; 
+  gap: 15px; z-index: 20; pointer-events: none; padding: 0 20px; 
+}
+
+.card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter; pointer-events: auto;}
 
 .card-scaler{
   width:100%; height:100%; border-radius:4px; overflow:hidden; position:relative; 
-  background:#ffffff; 
+  background:transparent; 
   box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);
   transition:box-shadow 0.9s ease; 
-  -webkit-backface-visibility: hidden; backface-visibility: hidden;
-  transform: translate3d(0,0,0);
 }
 
+/* FIX KETAJAMAN HD: scale(1.01) dihapus. Menggunakan -webkit-optimize-contrast untuk paksa ketajaman tertinggi */
 .card-scaler img{
   width:100%; height:100%; display:block; object-fit:cover; position:relative; z-index:1;
-  background-color: #ffffff;
-  transform: translate3d(0,0,0) scale(1.01);
+  background-color: transparent;
+  transform: translateZ(0); 
   -webkit-backface-visibility: hidden; backface-visibility: hidden;
-  outline: 1px solid transparent;
-  will-change: transform;
+  image-rendering: -webkit-optimize-contrast; 
+  image-rendering: crisp-edges;
 }
 
 .card.center .card-scaler{box-shadow:0 0 60px rgba(244, 207, 105, 0.35), 0 45px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,.3);}
@@ -53,7 +77,6 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .card.center .card-scaler::after{animation:shine 2s cubic-bezier(0.25, 1, 0.3, 1) 0.5s forwards}
 @keyframes shine{0%{left:-150%;opacity:0}20%{opacity:1}100%{left:150%;opacity:0}}
 
-/* LENCANA LOKASI DENGAN EFEK KACA PEMBESAR */
 .loc-badge {
   position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(3px);
@@ -61,7 +84,7 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
   display: flex; align-items: center; gap: 6px;
   border: 1px solid rgba(255,255,255,0.2); z-index: 10;
   opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
-  white-space: nowrap;
+  white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 .card.center .loc-badge { opacity: 1; }
 .loc-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; display: inline-block; }
@@ -71,26 +94,25 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .zoom-btn:hover{background:var(--gold);color:#000;transform:scale(1.1);}
 .zoom-btn svg{width:24px;height:24px;fill:currentColor;}
 
-.card.center{z-index:5; transform:translate(-50%,-50%) translateZ(0px) scale(1); filter:none; opacity:1;}
+/* PENAMBAHAN translateZ(1px) PADA CARD CENTER AGAR FOTO KELUAR DARI SUB-PIXEL BLURRING */
+.card.center{z-index:5; transform:translate(-50%,-50%) translateZ(1px) scale(1); filter:none; opacity:1;}
 .card.left{z-index:3;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.85)) translateZ(-150px) rotateY(20deg) scale(0.95);filter:saturate(.8) brightness(.7);opacity:.95}
 .card.right{z-index:3;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.85)) translateZ(-150px) rotateY(-20deg) scale(0.95);filter:saturate(.8) brightness(.7);opacity:.95}
 .card.farleft{z-index:1;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -1.5)) translateZ(-250px) rotateY(35deg) scale(0.8);filter:brightness(.4);opacity:.6}
 .card.farright{z-index:1;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 1.5)) translateZ(-250px) rotateY(-35deg) scale(0.8);filter:brightness(.4);opacity:.6}
 .card.hidden{opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.45)}
 
-.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(20,20,20,.30);color:white;font-size:22px;display:grid;place-items:center;cursor:pointer;z-index:25;backdrop-filter:blur(10px);transition:background 0.3s}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(20,20,20,.30);color:white;font-size:22px;display:grid;place-items:center;cursor:pointer;z-index:25;backdrop-filter:blur(10px);transition:background 0.3s; pointer-events: auto;}
 .nav:hover{background:rgba(255,255,255,.2)}.nav.prev{left:24px}.nav.next{right:24px}
 
-.bottom{position:fixed;left:0;right:0;bottom:35px;padding:0 36px;display:flex;justify-content:flex-end;align-items:end;z-index:20;pointer-events:none;}
-.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:right;line-height:1.4; pointer-events:auto;}
-
-/* POSISI TITIK INDIKATOR DITURUNKAN */
-.dots{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
+.dots{display:flex; gap:6px; pointer-events: auto;}
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
 
-.wa-btn { position:fixed; bottom:25px; left:50%; transform:translateX(-50%); background:#25d366; color:#fff; font-family:Inter, sans-serif; font-weight:700; font-size:14px; text-decoration:none; padding:12px 24px; border-radius:50px; display:flex; align-items:center; gap:8px; box-shadow:0 10px 25px rgba(37,211,102,0.4); z-index:50; transition:transform 0.2s, background 0.2s; border:1px solid rgba(255,255,255,0.2); pointer-events:auto; }
-.wa-btn:hover { background:#20bd5a; transform:translateX(-50%) scale(1.05); }
-.wa-btn svg { width:20px; height:20px; fill:#fff; }
+.wa-btn { pointer-events: auto; background: #25d366; color: #fff; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 50px; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 25px rgba(37,211,102,0.4); transition: transform 0.2s, background 0.2s; border: 1px solid rgba(255,255,255,0.2); }
+.wa-btn:hover { background: #20bd5a; transform: scale(1.05); }
+.wa-btn svg { width: 20px; height: 20px; fill: #fff; }
+
+.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:center;line-height:1.4; pointer-events: auto;}
 
 #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
 #lightbox.show { opacity: 1; pointer-events: auto; }
@@ -100,45 +122,43 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 .lb-close:hover { background: rgba(255,255,255,0.35); }
 
 @media(max-width:800px){
- :root { --card-w: min(240px, 65vw); } 
- header { padding-top: 20px; } 
+ :root { --card-w: min(var(--input-w), 68vw, calc(var(--max-h) / 1.5)); } 
  .header-titles h1{font-size:22px; margin-bottom:4px;}
- .stage{height:100vh; margin-top: calc(var(--stage-offset) - 80px);}
- .card.left{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.65)) translateZ(-100px) rotateY(20deg) scale(0.9)}
- .card.right{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.65)) translateZ(-100px) rotateY(-20deg) scale(0.9)}
+ .card.left{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.85)) translateZ(-100px) rotateY(20deg) scale(0.9)}
+ .card.right{transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.85)) translateZ(-100px) rotateY(-20deg) scale(0.9)}
  .card.farleft,.card.farright{display:none}
  .nav.prev{left:10px; width:35px; height:35px; font-size:18px;}
  .nav.next{right:10px; width:35px; height:35px; font-size:18px;}
- .bottom{bottom:25px;padding:0 20px;justify-content:center;}.hint{display:none}
- .dots{bottom: 80px;}
+ .hint{display:none}
 }
 </style>
 </head>
 <body>
 <div id="ambient"></div><div id="shade"></div>
 
-<header>
-  <div class="header-titles">
-    <h1>Lingbox Wedding Gallery</h1>
-    <p>Mengabadikan setiap tawa dan cerita di hari paling bahagia</p>
-  </div>
-</header>
+<div class="layout-wrapper">
+  <header>
+    <div class="header-titles">
+      <h1>Lingbox Wedding Gallery</h1>
+      <p>Mengabadikan setiap tawa dan cerita di hari paling bahagia</p>
+    </div>
+  </header>
 
-<main>
-  <button class="nav prev" aria-label="Previous">‹</button>
-  <div class="stage" id="stage"></div>
-  <button class="nav next" aria-label="Next">›</button>
-</main>
+  <main>
+    <button class="nav prev" aria-label="Previous">‹</button>
+    <div class="stage" id="stage"></div>
+    <button class="nav next" aria-label="Next">›</button>
+  </main>
 
-<div class="bottom">
-  <div class="hint">Klik ikon 🔍 untuk ZOOM • Geser foto untuk melihat lainnya</div>
+  <footer>
+    <div class="dots" id="dots"></div>
+    <a href="https://wa.me/6285270022255?text=Halo%2C%20saya%20ingin%20tanya%20paket%20Photobooth!" class="wa-btn" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Booking Sekarang
+    </a>
+    <div class="hint">Klik ikon 🔍 untuk ZOOM • Geser foto untuk melihat lainnya</div>
+  </footer>
 </div>
-<div class="dots" id="dots"></div>
-
-<a href="https://wa.me/6285270022255?text=Halo%2C%20saya%20ingin%20tanya%20paket%20Photobooth!" class="wa-btn" target="_blank">
-  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-  Booking Sekarang
-</a>
 
 <div id="lightbox">
   <div class="lb-close">✕</div>
@@ -147,8 +167,8 @@ main{height:100vh;position:relative;display:flex;align-items:center;justify-cont
 
 <script>
 
-const lockedCount = 4;
-let originalFiles = [{"src":"https://i.imgur.com/B4rsmji.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/67lWsZs.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/GDMlpk3.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/q2qcho4.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/gv7Sn50.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/LJZ1c6i.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/00m5TVf.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/t6dDt1O.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/7SCgG33.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/7KnQz7C.jpeg","label":"Padangsidimpuan"}];
+const lockedCount = 8;
+let originalFiles = [{"src":"https://i.imgur.com/GDMlpk3.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/q2qcho4.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/YasMMnj.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/x9yM0xK.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/B4rsmji.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/67lWsZs.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/HlsIKwA.jpeg","label":"Sibolga"},{"src":"https://i.imgur.com/mCsh5yG.jpeg","label":"Sibolga"},{"src":"https://i.imgur.com/7SCgG33.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/7KnQz7C.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/53KUuOX.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/FQVaDHA.jpeg","label":"Padangsidimpuan"},{"src":"https://i.imgur.com/gv7Sn50.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/LJZ1c6i.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/00m5TVf.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/t6dDt1O.jpeg","label":"Pandan"},{"src":"https://i.imgur.com/xi3I4C4.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/C2vbXue.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/BNBCYTA.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/BdX3Ibi.jpeg","label":"Panyabungan"},{"src":"https://i.imgur.com/geK6Smb.jpeg","label":"Sibolga"},{"src":"https://i.imgur.com/nozWQba.jpeg","label":"Sibolga"},{"src":"https://i.imgur.com/qeG4BCq.jpeg","label":"Sibolga"},{"src":"https://i.imgur.com/oTSGW9F.jpeg","label":"Sibolga"}];
 let finalFiles = [];
 
 if (lockedCount > 0 && originalFiles.length > lockedCount) {
