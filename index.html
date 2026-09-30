@@ -2,21 +2,34 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
 <title>Wedding Photobooth — Gallery</title>
 <style>
 :root{
   --gold:#f4cf69; --text:#fff; --muted:rgba(255,255,255,.66);
-  --input-w: 1000px;
-  --max-h: calc(100vh - 280px);
+  --input-w: 300px;
+  --vh: 100vh;
+}
+@supports (height: 100dvh) {
+  :root { --vh: 100dvh; }
+}
+:root {
+  --max-h: calc(var(--vh) - 280px);
   --card-w: min(var(--input-w), 75vw, calc(var(--max-h) / 1.5));
   --card-h: calc(var(--card-w) * 1.5);
   --stage-offset: 0px;
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;color:var(--text);font-family:Inter,sans-serif; touch-action: pan-y;}
+
+/* KUNCI LAYAR ANTI-SCROLL (TAPI TETAP BISA SWIPE NATIVE JS) */
+html,body{
+  margin:0; width:100%; height:100%; 
+  overflow:hidden; overscroll-behavior:none; 
+  background:#090807; color:var(--text); font-family:Inter,sans-serif; 
+  position:fixed; inset:0; 
+}
 
 #ambient{position:fixed;inset:-10%;z-index:1;background-color:#090807;background-position:center;background-size:cover;filter:blur(45px) saturate(1.4) brightness(0.65);transform:scale(1.1);opacity:1;transition:background-image 0.9s ease;}
 #shade{position:fixed;inset:0;z-index:2;background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);pointer-events:none}
@@ -24,20 +37,19 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090807;col
 .layout-wrapper {
   position: absolute; inset: 0; z-index: 10;
   display: flex; flex-direction: column; justify-content: space-between;
-  padding: 3vh 0; box-sizing: border-box;
-  pointer-events: none; 
+  padding: 20px 0; box-sizing: border-box;
 }
 
 header { 
   flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; 
-  z-index: 20; text-align: center; pointer-events: none; padding: 0 20px; 
+  z-index: 20; text-align: center; padding: 0 20px; 
 }
 .header-titles h1 { font-family: Georgia,serif; margin: 0 0 6px; font-size: 28px; color: var(--gold); font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
 .header-titles p { margin: 0; color: #eee; font-size: 13px; letter-spacing: 0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
 
 main { 
   flex: 1 1 auto; display: flex; align-items: center; justify-content: center; 
-  position: relative; z-index: 10; pointer-events: none; min-height: 0; 
+  position: relative; z-index: 10; min-height: 0; 
 }
 .stage { 
   position: relative; width: 100%; height: var(--card-h); 
@@ -47,19 +59,19 @@ main {
 
 footer { 
   flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; 
-  gap: 15px; z-index: 20; pointer-events: none; padding: 0 20px; 
+  gap: 15px; z-index: 20; padding: 0 20px; 
 }
 
-.card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter; pointer-events: auto;}
+.card{position:absolute;left:50%;top:50%;width:var(--card-w);height:var(--card-h);transform-origin:center center;transition:transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),opacity 0.9s ease,filter 0.9s ease;cursor:pointer;will-change:transform, opacity, filter;}
 
 .card-scaler{
   width:100%; height:100%; border-radius:4px; overflow:hidden; position:relative; 
   background:transparent; 
-  box-shadow:0 25px 50px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1);
   transition:box-shadow 0.9s ease; 
+  /* BAYANGAN BIASA KETIKA TIDAK DI TENGAH */
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
-/* FIX KETAJAMAN HD: scale(1.01) dihapus. Menggunakan -webkit-optimize-contrast untuk paksa ketajaman tertinggi */
 .card-scaler img{
   width:100%; height:100%; display:block; object-fit:cover; position:relative; z-index:1;
   background-color: transparent;
@@ -69,7 +81,14 @@ footer {
   image-rendering: crisp-edges;
 }
 
-.card.center .card-scaler{box-shadow:0 0 60px rgba(244, 207, 105, 0.35), 0 45px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,.3);}
+/* EFEK GLOW BESAR, TEBAL, DAN MENYEBAR KHUSUS FOTO TENGAH */
+.card.center .card-scaler{
+  box-shadow: 
+    0 0 80px rgba(244, 207, 105, 0.45),   /* Glow emas menyebar luas */
+    0 0 120px rgba(244, 207, 105, 0.25),  /* Glow lapis kedua lebih luas lagi */
+    0 25px 60px rgba(0,0,0,0.9),          /* Bayangan hitam tebal di bawah */
+    0 0 0 1px rgba(255,255,255,0.3);      /* Garis tipis putih di tepi */
+}
 
 .card-scaler::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 45%);z-index:2;opacity:0;transition:opacity 0.9s;pointer-events:none}
 .card.center .card-scaler::before{opacity:1}
@@ -94,7 +113,6 @@ footer {
 .zoom-btn:hover{background:var(--gold);color:#000;transform:scale(1.1);}
 .zoom-btn svg{width:24px;height:24px;fill:currentColor;}
 
-/* PENAMBAHAN translateZ(1px) PADA CARD CENTER AGAR FOTO KELUAR DARI SUB-PIXEL BLURRING */
 .card.center{z-index:5; transform:translate(-50%,-50%) translateZ(1px) scale(1); filter:none; opacity:1;}
 .card.left{z-index:3;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * -0.85)) translateZ(-150px) rotateY(20deg) scale(0.95);filter:saturate(.8) brightness(.7);opacity:.95}
 .card.right{z-index:3;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 0.85)) translateZ(-150px) rotateY(-20deg) scale(0.95);filter:saturate(.8) brightness(.7);opacity:.95}
@@ -102,17 +120,17 @@ footer {
 .card.farright{z-index:1;transform:translate(-50%,-50%) translateX(calc(var(--card-w) * 1.5)) translateZ(-250px) rotateY(-35deg) scale(0.8);filter:brightness(.4);opacity:.6}
 .card.hidden{opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.45)}
 
-.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(20,20,20,.30);color:white;font-size:22px;display:grid;place-items:center;cursor:pointer;z-index:25;backdrop-filter:blur(10px);transition:background 0.3s; pointer-events: auto;}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(20,20,20,.30);color:white;font-size:22px;display:grid;place-items:center;cursor:pointer;z-index:25;backdrop-filter:blur(10px);transition:background 0.3s;}
 .nav:hover{background:rgba(255,255,255,.2)}.nav.prev{left:24px}.nav.next{right:24px}
 
-.dots{display:flex; gap:6px; pointer-events: auto;}
+.dots{display:flex; gap:6px;}
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s;cursor:pointer;}.dot.active{width:18px;border-radius:10px;background:#f1cf62}
 
-.wa-btn { pointer-events: auto; background: #25d366; color: #fff; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 50px; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 25px rgba(37,211,102,0.4); transition: transform 0.2s, background 0.2s; border: 1px solid rgba(255,255,255,0.2); }
+.wa-btn { background: #25d366; color: #fff; font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 50px; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 25px rgba(37,211,102,0.4); transition: transform 0.2s, background 0.2s; border: 1px solid rgba(255,255,255,0.2); }
 .wa-btn:hover { background: #20bd5a; transform: scale(1.05); }
 .wa-btn svg { width: 20px; height: 20px; fill: #fff; }
 
-.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:center;line-height:1.4; pointer-events: auto;}
+.hint{font-size:10px;color:rgba(255,255,255,.58);text-align:center;line-height:1.4;}
 
 #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
 #lightbox.show { opacity: 1; pointer-events: auto; }
